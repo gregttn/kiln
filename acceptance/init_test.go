@@ -1,6 +1,7 @@
 package acceptance_test
 
 import (
+	"github.com/matt-royal/golandreporter"
 	"github.com/onsi/gomega/gexec"
 
 	. "github.com/onsi/ginkgo"
@@ -13,7 +14,7 @@ var pathToMain string
 
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "acceptance")
+	RunSpecsWithCustomReporters(t, "acceptance", []Reporter{golandreporter.NewAutoGolandReporter()})
 }
 
 var _ = BeforeSuite(func() {

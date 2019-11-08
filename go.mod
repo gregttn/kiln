@@ -10,6 +10,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
+	github.com/matt-royal/golandreporter v0.0.0-20191106205232-d2ca4689645d
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.7.0

@@ -1,6 +1,7 @@
 package cargo_test
 
 import (
+	"github.com/matt-royal/golandreporter"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -9,5 +10,5 @@ import (
 
 func TestCargo(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "internal/cargo")
+	RunSpecsWithCustomReporters(t, "internal/cargo", []Reporter{golandreporter.NewAutoGolandReporter()})
 }

@@ -2,6 +2,7 @@ package builder_test
 
 import (
 	"bytes"
+	"github.com/matt-royal/golandreporter"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -12,7 +13,7 @@ import (
 
 func TestBuilder(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "builder")
+	RunSpecsWithCustomReporters(t, "builder", []Reporter{golandreporter.NewAutoGolandReporter()})
 }
 
 func NewBuffer(b *bytes.Buffer) *Buffer {
