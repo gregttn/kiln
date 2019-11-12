@@ -41,6 +41,7 @@ func (update Update) Execute(args []string) error {
 	_, err := jhanda.Parse(&update.Options, args)
 	if err != nil {
 		return err
+		return err
 	}
 
 	update.StemcellsVersionsService.SetToken(update.Options.PivNetToken)

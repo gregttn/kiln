@@ -21,6 +21,7 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20190912141932-bc967efca4b8 // indirect
 	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/src-d/go-billy.v4 v4.3.2
 	gopkg.in/yaml.v2 v2.2.2

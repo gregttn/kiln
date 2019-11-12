@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/pivotal-cf/kiln/commands/fakes"
 	"log"
 	"os"
 
@@ -119,6 +120,8 @@ func main() {
 	commandSet["update"] = commands.Update{
 		StemcellsVersionsService: new(fetcher.Pivnet),
 	}
+	fs := osfs.New("")
+	commandSet["update-release"] = commands.NewUpdateRelease(fs,&fakes.ReleaseFinder{})
 
 	err = commandSet.Execute(command, args)
 	if err != nil {
