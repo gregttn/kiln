@@ -7,12 +7,12 @@ import (
 	"github.com/pivotal-cf/kiln/internal/cargo"
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/yaml.v2"
+	"log"
 )
 
-//go:generate counterfeiter -o ./fakes/release_finder.go --fake-name ReleaseFinder . ReleaseFinder
-type ReleaseFinder interface {
-	GetMatchedReleases(fetcher.ReleaseRequirementSet, cargo.Stemcell) ([]fetcher.RemoteRelease, error)
-	DownloadReleases(releasesDir string, matchedS3Objects []fetcher.RemoteRelease, downloadThreads int) (fetcher.LocalReleaseSet, error)
+//go:generate counterfeiter -o ./fakes/release_downloader.go --fake-name ReleaseDownloader . ReleaseDownloader
+type ReleaseDownloader interface {
+	DownloadRelease(releasesDir string, requirement fetcher.ReleaseRequirement) (fetcher.LocalRelease, error)
 }
 
 type UpdateRelease struct {
@@ -20,34 +20,29 @@ type UpdateRelease struct {
 		Kilnfile       string   `short:"kf" long:"kilnfile" required:"true" description:"path to Kilnfile"`
 		Name string `short:"n" long:"name" required:"true" description: "name of release to update""`
 		Version string `short:"v" long:"version" required:"true" description: "desired version of release""`
+		ReleasesDir string `short:"rd" long:"releases-directory" default:"releases" description:"path to a directory to download releases into"`
 	}
-	releaseFinder ReleaseFinder
-	filesystem billy.Filesystem
+	releaseDownloader ReleaseDownloader
+	filesystem        billy.Filesystem
+	logger            *log.Logger
 }
 
-func NewUpdateRelease(filesystem billy.Filesystem,releaseFinder ReleaseFinder) UpdateRelease {
-	return UpdateRelease{releaseFinder: releaseFinder, filesystem: filesystem}
+func NewUpdateRelease(logger *log.Logger, filesystem billy.Filesystem,releaseDownloader ReleaseDownloader) UpdateRelease {
+	return UpdateRelease{logger: logger, releaseDownloader: releaseDownloader, filesystem: filesystem}
 }
 
 func (u UpdateRelease) Execute(args []string) error {
-	// find the release in a remote source
-	// remoteRelease, err := releaseFinder.Find(releaseName, releaseVersion)
-	releaseRequirementSet := fetcher.ReleaseRequirementSet{}
-	releaseRequirementSet[fetcher.ReleaseID{Version: "1.87.8", Name: "capi"}] = fetcher.ReleaseRequirement{Name: "capi", Version: "1.87.8"}
-
-	releaseSet, err := u.releaseFinder.GetMatchedReleases(releaseRequirementSet, cargo.Stemcell{})
-	if err != nil {
-		panic("banana get matched")
-	}
-
-	_, err = u.releaseFinder.DownloadReleases("something",releaseSet, 0)
-	if err != nil {
-		panic("banana download")
-	}
-
-	_, err = jhanda.Parse(&u.Options, args)
+	_, err := jhanda.Parse(&u.Options, args)
 	if err != nil {
 		panic("banananana")
+	}
+
+	releaseRequirement := fetcher.ReleaseRequirement{Name: u.Options.Name, Version: u.Options.Version}
+
+	releaseDir := u.Options.ReleasesDir
+	localRelease, err := u.releaseDownloader.DownloadRelease(releaseDir, releaseRequirement)
+	if err != nil {
+		panic("banana download")
 	}
 
 	kilnfileLockPath := fmt.Sprintf("%s.lock", u.Options.Kilnfile)
@@ -69,7 +64,23 @@ func (u UpdateRelease) Execute(args []string) error {
 		panic("banana create")
 	}
 
-	kilnfileLock.Releases[0].Version = "1.87.8"
+	var matchingRelease *cargo.Release
+	for i := range kilnfileLock.Releases {
+		if kilnfileLock.Releases[i].Name == u.Options.Name {
+			matchingRelease = &kilnfileLock.Releases[i]
+			break
+		}
+	}
+	if matchingRelease == nil {
+		panic("banana no matching release")
+	}
+	matchingRelease.Version = u.Options.Version
+	sha, err := fetcher.CalculateSum(localRelease.LocalPath(), u.filesystem)
+	if err != nil {
+		panic(fmt.Sprintf("banana sha1 failed, %+v", err))
+	}
+	matchingRelease.SHA1 = sha
+
 	updatedLockFileYAML, err := yaml.Marshal(kilnfileLock)
 	if err != nil {
 		panic("banana marshal")
@@ -79,13 +90,8 @@ func (u UpdateRelease) Execute(args []string) error {
 	if err != nil {
 		panic("banana write")
 	}
-	// download it
-	// localrelease, err := remoteRelease.download(temporaryPlace)
-	// sha 1 sum it
-	// shasum(localrelease.path)
-	// write the sha1sum and the version number to the kilnfile.lock
-	//
-	fmt.Println("Updated capi to 1.87.8")
+
+	u.logger.Printf("Updated %s to %s\n", u.Options.Name, u.Options.Version)
 	return nil
 }
 
@@ -95,4 +101,17 @@ func (u UpdateRelease) Usage() jhanda.Usage {
 		ShortDescription: "",
 		Flags:            u.Options,
 	}
+}
+
+type releaseDownloader struct {
+	releaseSources []fetcher.ReleaseSource
+}
+
+func NewReleaseDownloader(outLogger *log.Logger, kilnfile cargo.Kilnfile) releaseDownloader {
+	releaseSources := fetcher.NewReleaseSourcesFactory(outLogger)(kilnfile, false)
+	return releaseDownloader{releaseSources: releaseSources}
+}
+
+func (rd releaseDownloader) DownloadRelease(releaseDir string, requirement fetcher.ReleaseRequirement) (fetcher.LocalRelease, error) {
+	return nil, nil
 }

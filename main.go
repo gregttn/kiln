@@ -121,7 +121,7 @@ func main() {
 		StemcellsVersionsService: new(fetcher.Pivnet),
 	}
 	fs := osfs.New("")
-	commandSet["update-release"] = commands.NewUpdateRelease(fs,&fakes.ReleaseFinder{})
+	commandSet["update-release"] = commands.NewUpdateRelease(outLogger, fs, &fakes.ReleaseDownloader{})
 
 	err = commandSet.Execute(command, args)
 	if err != nil {
