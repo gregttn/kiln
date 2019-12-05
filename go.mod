@@ -16,7 +16,7 @@ require (
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
 	github.com/pivotal-cf-experimental/gomegamatchers v0.0.0-20180326192815-e36bfcc98c3a
-	github.com/pivotal-cf/go-pivnet/v2 v2.0.11
+	github.com/pivotal-cf/go-pivnet/v3 v3.0.2 // indirect
 	github.com/pivotal-cf/jhanda v0.0.0-20191113141013-9cb1997202c0
 	github.com/shirou/gopsutil v2.19.10+incompatible // indirect
 	github.com/stretchr/testify v1.4.0 // indirect

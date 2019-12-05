@@ -14,8 +14,8 @@ import (
 	"github.com/pivotal-cf/kiln/internal/cargo"
 
 	"github.com/Masterminds/semver"
-	"github.com/pivotal-cf/go-pivnet/v2"
-	"github.com/pivotal-cf/go-pivnet/v2/logshim"
+	"github.com/pivotal-cf/go-pivnet/v3"
+	"github.com/pivotal-cf/go-pivnet/v3/logshim"
 	"github.com/pivotal-cf/jhanda"
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/yaml.v2"
